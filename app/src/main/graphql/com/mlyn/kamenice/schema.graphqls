@@ -1,0 +1,493 @@
+type Query {
+  settings: Settings
+  suites: [Suite]
+  suite(suiteId: Int): Suite
+  reservation(reservationId: Int): Reservation
+  reservations: [Reservation]
+  reservationMeals: [ReservationTypeOption]
+  reservationTypes: [ReservationTypeOption]
+  suiteReservations(suiteId: Int): [Reservation]
+  guests: [Guest]
+  guest(guestId: Int): Guest
+  reservationGuests(reservationHash: String): ReservationGuests
+  discountSuiteTypes: [DiscountSuiteOption]
+  discountsSuite(suiteId: Int): [DiscountSuite]
+  discountSettingsTypes: [DiscountSettingsOption]
+  discountsSettings(settingsId: Int): [DiscountSettings]
+  price(data: PriceInput): Price
+}
+
+type Settings {
+  id: ID!
+  municipalityFee: Decimal
+  priceBreakfast: Decimal
+  priceHalfboard: Decimal
+  userAvatar: String
+  userColor: String
+  userName: String
+  discountSettingsSet: [DiscountSettings!]!
+}
+
+"""
+The `Decimal` scalar type represents a python Decimal.
+"""
+scalar Decimal
+
+type DiscountSettings {
+  id: ID!
+  settings: Settings!
+  type: DiscountSettingsType!
+  value: Int!
+}
+
+"""
+An enumeration.
+"""
+enum DiscountSettingsType {
+  """
+  Snídaně (dítě 3 - 12 let)
+  """
+  CHILD_BREAKFAST_DISCOUNT
+  """
+  Polopenze (dítě 3 - 12 let)
+  """
+  HALFBOARD_DISCOUNT
+}
+
+type Suite {
+  id: ID!
+  number: Int
+  numberBeds: Int!
+  numberBedsExtra: Int!
+  priceBase: Decimal!
+  title: String!
+  discountSuiteSet: [DiscountSuite!]!
+}
+
+type DiscountSuite {
+  id: ID!
+  suite: Suite!
+  type: DiscountSuiteType!
+  value: Int!
+}
+
+"""
+An enumeration.
+"""
+enum DiscountSuiteType {
+  """
+  Dítě 3-12 let
+  """
+  CHILD_DISCOUNT
+  """
+  Přistýlka
+  """
+  EXTRA_BED_DISCOUNT
+  """
+  Pátá a další osoba
+  """
+  FIFTH_MORE_BED
+  """
+  Dítě do 3 let
+  """
+  INFANT_DISCOUNT
+  """
+  Třetí a čtvrtá osoba
+  """
+  THIRD_FOURTH_BED
+  """
+  Tři a více nocí
+  """
+  THREE_NIGHTS_DISCOUNT
+}
+
+type Reservation {
+  id: ID!
+  expired: DateTime
+  fromDate: DateTime!
+  guest: Guest!
+  meal: ReservationMeal!
+  notes: String
+  payingGuest: Guest
+  priceAccommodation: Decimal!
+  priceMeal: Decimal!
+  priceMunicipality: Decimal!
+  priceTotal: Decimal!
+  purpose: String
+  roommates: [Guest!]!
+  suite: Suite!
+  toDate: DateTime!
+  type: ReservationType!
+}
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+type Guest {
+  id: ID!
+  addressMunicipality: String
+  addressPsc: Int
+  addressStreet: String
+  age: GuestAge
+  citizenship: String
+  color: String
+  email: String
+  gender: GuestGender
+  identity: String
+  name: String!
+  phoneNumber: String
+  surname: String!
+  visaNumber: String
+}
+
+"""
+An enumeration.
+"""
+enum GuestAge {
+  """
+  Dítě do 3 let
+  """
+  INFANT
+  """
+  Dítě 3-12 let
+  """
+  CHILD
+  """
+  12+ let
+  """
+  YOUNG
+  """
+  Dospělý
+  """
+  ADULT
+}
+
+"""
+An enumeration.
+"""
+enum GuestGender {
+  """
+  Male
+  """
+  M
+  """
+  Female
+  """
+  F
+}
+
+"""
+An enumeration.
+"""
+enum ReservationMeal {
+  """
+  Bez Stravy
+  """
+  NOMEAL
+  """
+  Jen Snídaně
+  """
+  BREAKFAST
+  """
+  Polopenze
+  """
+  HALFBOARD
+}
+
+"""
+An enumeration.
+"""
+enum ReservationType {
+  """
+  Aktuálně ubytování
+  """
+  ACCOMMODATED
+  """
+  Závazná rezervace
+  """
+  BINDING
+  """
+  Obydlený termín
+  """
+  INHABITED
+  """
+  Nezávazná rezervace
+  """
+  NONBINDING
+}
+
+type ReservationTypeOption {
+  label: String!
+  value: String!
+}
+
+type ReservationGuests {
+  guest: Guest
+  roommates: [Guest]
+  suite: Suite
+}
+
+type DiscountSuiteOption {
+  name: String!
+  value: String!
+}
+
+type DiscountSettingsOption {
+  label: String!
+  value: String!
+}
+
+type Price {
+  accommodation: Int!
+  meal: Int!
+  municipality: Int!
+  total: Int!
+}
+
+input PriceInput {
+  guests: [Int]!
+  meal: String
+  numberDays: Int!
+  settingsId: Int
+  suiteId: Int!
+}
+
+type Mutation {
+  tokenAuth(username: String!, password: String!): ObtainJSONWebToken
+  verifyToken(token: String): Verify
+  refreshToken(refreshToken: String): Refresh
+  revokeToken(refreshToken: String): Revoke
+  createGuest(data: GuestInput!): CreateGuest
+  deleteGuest(guestId: ID): DeleteGuest
+  updateGuest(data: GuestInput!): UpdateGuest
+  createReservationGuest(data: ReservationGuestInput!): CreateReservationGuest
+  deleteReservationGuest(data: ReservationGuestInput!): DeleteReservationGuest
+  updateReservationGuest(data: ReservationGuestInput!): UpdateReservationGuest
+  createReservation(data: ReservationInput!): CreateReservation
+  deleteReservation(reservationId: ID): DeleteReservation
+  updateReservation(data: ReservationInput!): UpdateReservation
+  sendConfirmation(reservationId: ID): SendConfirmationEmail
+  createSuite(data: SuiteInput!): CreateSuite
+  deleteSuite(suiteId: ID): DeleteSuite
+  updateSuite(data: SuiteInput!): UpdateSuite
+  createDiscount(data: DiscountSuiteInput!): CreateDiscount
+  deleteDiscount(discountId: ID): DeleteDiscount
+  updateDiscount(data: DiscountInputUpdate!): UpdateDiscount
+  updateSettings(data: SettingsInput!): UpdateSettings
+  createContactMessage(data: ContactInput!): CreateContactMessage
+}
+
+type ObtainJSONWebToken {
+  payload: GenericScalar!
+  refreshExpiresIn: Int!
+  settings: Settings
+  token: String!
+  refreshToken: String!
+}
+
+"""
+The `GenericScalar` scalar type represents a generic
+GraphQL scalar value that could be:
+String, Boolean, Int, Float, List or Object.
+"""
+scalar GenericScalar
+
+type Verify {
+  payload: GenericScalar!
+}
+
+type Refresh {
+  payload: GenericScalar!
+  refreshExpiresIn: Int!
+  token: String!
+  refreshToken: String!
+}
+
+type Revoke {
+  revoked: Int!
+}
+
+type CreateGuest {
+  guest: Guest
+}
+
+input GuestInput {
+  age: String
+  addressMunicipality: String
+  addressPsc: Int
+  addressStreet: String
+  citizenship: String
+  email: String
+  gender: String
+  id: ID
+  identity: String
+  name: String
+  phoneNumber: String
+  surname: String
+  visaNumber: String
+}
+
+type DeleteGuest {
+  guest: Guest
+}
+
+type UpdateGuest {
+  guest: Guest
+}
+
+type CreateReservationGuest {
+  guest: Guest
+}
+
+input ReservationGuestInput {
+  age: String
+  addressMunicipality: String
+  addressPsc: Int
+  addressStreet: String
+  citizenship: String
+  email: String
+  gender: String
+  id: ID
+  identity: String
+  name: String
+  phoneNumber: String
+  surname: String
+  visaNumber: String
+  hash: String
+}
+
+type DeleteReservationGuest {
+  guest: Guest
+}
+
+type UpdateReservationGuest {
+  guest: Guest
+}
+
+type CreateReservation {
+  reservation: Reservation
+}
+
+input ReservationInput {
+  expired: String
+  fromDate: String
+  guestId: Int
+  id: ID
+  meal: String
+  notes: String
+  payingGuestId: Int
+  priceAccommodation: Decimal
+  priceMeal: Decimal
+  priceMunicipality: Decimal
+  priceTotal: Decimal
+  purpose: String
+  roommateIds: [Int]
+  suiteId: Int
+  toDate: String
+  type: String
+}
+
+type DeleteReservation {
+  reservation: Reservation
+}
+
+type UpdateReservation {
+  reservation: Reservation
+}
+
+type SendConfirmationEmail {
+  reservation: Reservation
+}
+
+type CreateSuite {
+  suite: Suite
+}
+
+input SuiteInput {
+  discounts: [SuiteDiscountInput]
+  id: ID
+  number: Int
+  numberBeds: Int
+  numberBedsExtra: Int
+  priceBase: Decimal
+  title: String
+}
+
+input SuiteDiscountInput {
+  type: String!
+  value: Int!
+}
+
+type DeleteSuite {
+  suite: Suite
+}
+
+type UpdateSuite {
+  suite: Suite
+}
+
+type CreateDiscount {
+  discount: DiscountSuite
+}
+
+input DiscountSuiteInput {
+  suiteId: Int
+  type: String
+  value: Int
+}
+
+type DeleteDiscount {
+  discount: DiscountSuite
+}
+
+type UpdateDiscount {
+  discount: DiscountSuite
+}
+
+input DiscountInputUpdate {
+  suiteId: Int
+  type: String
+  value: Int
+  id: ID
+}
+
+type UpdateSettings {
+  settings: Settings
+}
+
+input SettingsInput {
+  discounts: [SettingsDiscountInput]
+  id: ID
+  municipalityFee: Decimal
+  priceBreakfast: Decimal
+  priceHalfboard: Decimal
+  userAvatar: String
+  userColor: String
+  userName: String
+}
+
+input SettingsDiscountInput {
+  type: String!
+  value: Int!
+}
+
+type CreateContactMessage {
+  contact: Contact
+}
+
+type Contact {
+  message: String!
+}
+
+input ContactInput {
+  message: String
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
