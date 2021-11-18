@@ -13,4 +13,18 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="Theme.MlynKamenice.NoActionBar" parent="Theme.MlynKamenice">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <style name="Button.Theme.Blue" parent="Widget.AppCompat.Button.Colored">
+        <item name="backgroundTint">@color/vivid_blue</item>
+    </style>
+    <style name="Button.Theme.White" parent="Widget.AppCompat.Button.Colored">
+        <item name="backgroundTint">@color/white</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
 </resources>

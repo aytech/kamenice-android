@@ -1,5 +1,7 @@
 <resources>
-    <string name="app_name">Mlyn Kamenice</string>
+    <string name="app_name">Mlýn Kamenice</string>
     <string name="enter_username">Enter username</string>
     <string name="enter_password">Enter password</string>
+    <string name="login">Login</string>
+    <string name="reset">Reset</string>
 </resources>
