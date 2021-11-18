@@ -1,5 +1,7 @@
 package com.mlyn.kamenice
 
+import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -16,11 +18,23 @@ class MainActivity : AppCompatActivity() {
     private val apolloClient: ApolloClient = ApolloClient.builder()
         .serverUrl("https://kamenice.pythonanywhere.com/api")
         .build()
+    private lateinit var sharedPreferences: SharedPreferences
 
     // https://github.com/AppliKeySolutions/CosmoCalendar
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        sharedPreferences =
+            applicationContext.getSharedPreferences("kamenice_preferences", MODE_PRIVATE)
+        if (sharedPreferences.getString("userToken", null) == null) {
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            startActivity(intent)
+            finish()
+        } else {
+            Log.d("MainActivity", "Token found!")
+        }
 
         calendarView = findViewById(R.id.reservationsCalendar)
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->

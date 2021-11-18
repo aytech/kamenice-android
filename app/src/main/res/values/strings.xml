@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Mlyn Kamenice</string>
+    <string name="enter_username">Enter username</string>
+    <string name="enter_password">Enter password</string>
 </resources>
