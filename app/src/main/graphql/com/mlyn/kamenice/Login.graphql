@@ -1,0 +1,19 @@
+mutation Login($username: String!, $password: String!) {
+    tokenAuth(username: $username, password: $password) {
+        payload
+        refreshExpiresIn
+        refreshToken
+        token
+        settings {
+            id
+            municipalityFee
+            priceBreakfast
+            priceBreakfastChild
+            priceHalfboard
+            priceHalfboardChild
+            userAvatar
+            userColor
+            userName
+        }
+    }
+}

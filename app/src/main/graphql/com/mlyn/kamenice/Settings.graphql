@@ -1,9 +1,5 @@
 query Settings {
     settings {
-        discountSettingsSet {
-            type
-            value
-        }
         id,
         municipalityFee,
         priceBreakfast,
@@ -11,9 +7,5 @@ query Settings {
         userAvatar
         userColor,
         userName
-    }
-    discountSettingsTypes {
-        label
-        value
     }
 }

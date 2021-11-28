@@ -4,4 +4,8 @@
     <string name="enter_password">Enter password</string>
     <string name="login">Login</string>
     <string name="reset">Reset</string>
+    <string name="empty_username">Username cannot be empty</string>
+    <string name="empty_password">Password cannot be empty</string>
+    <string name="login_invalid">Username or passwors is incorrect</string>
+    <string name="login_failed">Login failed</string>
 </resources>
