@@ -54,7 +54,7 @@ class LoginActivity : BaseActivity() {
             if (username.isNotBlank() && password.isNotBlank()) {
                 spinner.visibility = View.VISIBLE
                 try {
-                    apolloClient.mutate(
+                    apolloClient(applicationContext).mutate(
                         LoginMutation(
                             username = username.toString(),
                             password = password.toString()

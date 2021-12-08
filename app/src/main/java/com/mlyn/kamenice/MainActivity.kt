@@ -9,8 +9,10 @@ import android.widget.Toast
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
+import com.mlyn.kamenice.configuration.AppConstants
 import com.mlyn.kamenice.configuration.AppConstants.Companion.SHARED_PREFERENCES_KEY
 import com.mlyn.kamenice.configuration.AppConstants.Companion.USER_TOKEN
+
 
 class MainActivity : BaseActivity() {
 
@@ -25,35 +27,32 @@ class MainActivity : BaseActivity() {
         sharedPreferences =
             applicationContext.getSharedPreferences(SHARED_PREFERENCES_KEY, MODE_PRIVATE)
         if (sharedPreferences.getString(USER_TOKEN, null) == null) {
+            redirectToLogin()
+        }
+
+        try {
+            apolloClient(applicationContext).query(SettingsQuery()).enqueue(
+                object : ApolloCall.Callback<SettingsQuery.Data>() {
+                    override fun onResponse(response: Response<SettingsQuery.Data>) {
+                        Log.d("MainActivity", "Activity response: %s".format(response.toString()))
+                    }
+
+                    override fun onFailure(e: ApolloException) {
+                        redirectToLogin()
+                    }
+                }
+            )
+        } catch (e: ApolloException) {
+            Log.d("MainActivity", e.toString())
+        }
+    }
+
+    fun redirectToLogin() {
+        runOnUiThread {
             val intent = Intent(this, LoginActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(intent)
             finish()
         }
-
-        calendarView = findViewById(R.id.reservationsCalendar)
-        calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            Toast.makeText(
-                this@MainActivity,
-                "Year $year, month $month, day $dayOfMonth clicked",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-
-//        try {
-//            apolloClient.query(SettingsQuery()).enqueue(
-//                object : ApolloCall.Callback<SettingsQuery.Data>() {
-//                    override fun onResponse(response: Response<SettingsQuery.Data>) {
-//                        Log.d("MainActivity", response.toString())
-//                    }
-//
-//                    override fun onFailure(e: ApolloException) {
-//                        Log.d("MainActivity", e.message.toString())
-//                    }
-//                }
-//            )
-//        } catch (e: ApolloException) {
-//            Log.d("MainActivity", e.toString())
-//        }
     }
 }
