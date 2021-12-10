@@ -1,11 +1,11 @@
 package com.mlyn.kamenice
 
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 import com.apollographql.apollo.ApolloClient
 import com.mlyn.kamenice.configuration.AppConstants.Companion.GRAPHQL_URL
 
-open class BaseActivity : AppCompatActivity() {
+open class BaseActivity : ComponentActivity() {
     private var instance: ApolloClient? = null
 
     fun apolloClient(context: Context): ApolloClient {
