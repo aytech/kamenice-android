@@ -1,109 +1,196 @@
 package com.mlyn.kamenice
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.TextView
-import com.apollographql.apollo.ApolloCall
-import com.apollographql.apollo.api.Response
-import com.apollographql.apollo.exception.ApolloException
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.mlyn.kamenice.configuration.AppConstants
 import com.mlyn.kamenice.configuration.AppConstants.Companion.USER_REFRESH_TOKEN
 import com.mlyn.kamenice.configuration.AppConstants.Companion.USER_TOKEN
+import com.mlyn.kamenice.ui.components.LoadingIndicator
+import com.mlyn.kamenice.ui.theme.AppTheme
+import kotlinx.coroutines.launch
 
 class LoginActivity : BaseActivity() {
 
-    private lateinit var spinner: ProgressBar
+    private val openDialog = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
 
-        spinner = findViewById(R.id.spinner)
-        val usernameText: EditText = findViewById(R.id.username)
-        val passwordText: EditText = findViewById(R.id.password)
-        val usernameEmpty: TextView = findViewById(R.id.usernameEmpty)
-        val passwordEmpty: TextView = findViewById(R.id.passwordEmpty)
-
-        findViewById<Button>(R.id.resetButton).setOnClickListener {
-            usernameText.text.clear()
-            passwordText.text.clear()
+        setContent {
+            ActivityContent()
         }
+    }
 
-        findViewById<Button>(R.id.loginButton).setOnClickListener {
-            val username = usernameText.text
-            val password = passwordText.text
+    @Composable
+    fun ActivityContent() {
 
-            if (username.isBlank()) {
-                usernameEmpty.visibility = View.VISIBLE
-            } else {
-                usernameEmpty.visibility = View.GONE
-            }
+        val scaffoldState = rememberScaffoldState()
+        val scope = rememberCoroutineScope()
+        val dialogMessage = remember { mutableStateOf("") }
+        val loading = remember { mutableStateOf(false) }
+        var username by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
 
-            if (password.isBlank()) {
-                passwordEmpty.visibility = View.VISIBLE
-            } else {
-                passwordEmpty.visibility = View.GONE
-            }
-
-            if (username.isNotBlank() && password.isNotBlank()) {
-                spinner.visibility = View.VISIBLE
-                try {
-                    apolloClient(applicationContext).mutate(
-                        LoginMutation(
-                            username = username.toString(),
-                            password = password.toString()
-                        )
-                    )
-                        .enqueue(
-                            object : ApolloCall.Callback<LoginMutation.Data>() {
-                                override fun onResponse(response: Response<LoginMutation.Data>) {
-                                    val token = response.data?.tokenAuth?.token
-                                    val refreshToken = response.data?.tokenAuth?.refreshToken
-                                    if (token == null || refreshToken == null) {
-                                        AlertDialog.Builder(this@LoginActivity)
-                                            .setTitle(resources.getString(R.string.login_failed))
-                                            .setMessage(resources.getString(R.string.login_invalid))
-                                            .show()
-                                    } else {
-                                        val sharedPreferences =
-                                            applicationContext.getSharedPreferences(
-                                                AppConstants.SHARED_PREFERENCES_KEY,
-                                                MODE_PRIVATE
-                                            )
-                                        with(sharedPreferences.edit()) {
-                                            putString(USER_TOKEN, token)
-                                            putString(USER_REFRESH_TOKEN, refreshToken)
-                                            apply()
-                                        }
-                                        redirectToMain()
-                                    }
-                                    updateSpinnerVisibility(View.GONE)
-                                }
-
-                                override fun onFailure(e: ApolloException) {
-                                    Log.d("LoginActivity", e.message.toString())
-                                    updateSpinnerVisibility(View.GONE)
+        AppTheme {
+            Scaffold(
+                scaffoldState = scaffoldState
+            ) {
+                Surface {
+                    when {
+                        loading.value -> LoadingIndicator()
+                        else -> Column(modifier = Modifier.fillMaxHeight()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 40.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column {
+                                    Text(
+                                        text = stringResource(id = R.string.app_name),
+                                        fontSize = 20.sp,
+                                        fontStyle = FontStyle.Italic,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Image(
+                                        painter = painterResource(id = R.drawable.ic_logo_100),
+                                        contentDescription = stringResource(id = R.string.app_name),
+                                        Modifier.padding(top = 10.dp)
+                                    )
                                 }
                             }
-                        )
-                } catch (e: ApolloException) {
-                    Log.d("LoginActivity", e.toString())
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column {
+                                    OutlinedTextField(
+                                        value = username,
+                                        onValueChange = { username = it },
+                                        label = { Text(stringResource(id = R.string.username)) },
+                                        modifier = Modifier.padding(top = 10.dp)
+                                    )
+                                    OutlinedTextField(
+                                        value = password,
+                                        onValueChange = { password = it },
+                                        label = { Text(stringResource(id = R.string.password)) },
+                                        modifier = Modifier.padding(top = 10.dp),
+                                        visualTransformation = PasswordVisualTransformation()
+                                    )
+                                }
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 20.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Button(onClick = {
+                                    when {
+                                        username.isEmpty() -> {
+                                            dialogMessage.value =
+                                                resources.getText(R.string.enter_username)
+                                                    .toString()
+                                            openDialog.value = true
+                                        }
+                                        password.isEmpty() -> {
+                                            dialogMessage.value =
+                                                resources.getText(R.string.enter_password)
+                                                    .toString()
+                                            openDialog.value = true
+                                        }
+                                        else ->
+                                            scope.launch {
+                                                loading.value = true
+                                                try {
+                                                    val data = apolloClient().mutation(
+                                                        LoginMutation(
+                                                            username = username,
+                                                            password = password
+                                                        )
+                                                    ).execute()
+                                                    if (data.data?.tokenAuth == null) {
+                                                        dialogMessage.value =
+                                                            resources.getText(R.string.login_failed)
+                                                                .toString()
+                                                        openDialog.value = true
+                                                    } else {
+                                                        val sharedPreferences =
+                                                            applicationContext.getSharedPreferences(
+                                                                AppConstants.SHARED_PREFERENCES_KEY,
+                                                                MODE_PRIVATE
+                                                            )
+                                                        with(sharedPreferences.edit()) {
+                                                            putString(
+                                                                USER_TOKEN,
+                                                                data.data?.tokenAuth?.token
+                                                            )
+                                                            putString(
+                                                                USER_REFRESH_TOKEN,
+                                                                data.data?.tokenAuth?.refreshToken
+                                                            )
+                                                            apply()
+                                                        }
+                                                        redirectToMain()
+                                                    }
+                                                } catch (exception: Exception) {
+                                                    dialogMessage.value =
+                                                        resources.getText(R.string.network_error)
+                                                            .toString()
+                                                    openDialog.value = true
+                                                }
+                                                loading.value = false
+                                            }
+                                    }
+                                }) {
+                                    Text(text = "Submit")
+                                }
+                            }
+                            if (openDialog.value) {
+                                AlertDialog(
+                                    onDismissRequest = {
+                                        // Dismiss the dialog when the user clicks outside the dialog or on the back
+                                        // button. If you want to disable that functionality, simply use an empty
+                                        // onCloseRequest.
+                                        openDialog.value = false
+                                    },
+                                    text = {
+                                        Text(text = dialogMessage.value)
+                                    },
+                                    confirmButton = {
+                                        Button(
+                                            onClick = {
+                                                openDialog.value = false
+                                            }) {
+                                            Text(stringResource(id = R.string.close))
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
-    fun updateSpinnerVisibility(state: Int) {
-        runOnUiThread { spinner.visibility = state }
-    }
-
-    fun redirectToMain() {
+    private fun redirectToMain() {
         runOnUiThread {
             val intent = Intent(this, MainActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)

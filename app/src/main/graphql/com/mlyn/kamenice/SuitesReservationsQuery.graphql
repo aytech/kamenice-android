@@ -1,0 +1,24 @@
+# noinspection GraphQLUnresolvedReference
+query SuitesReservations($from: String!, $to: String!) {
+    suites {
+        id
+        number
+        numberBeds
+        numberBedsExtra
+        priceBase
+        title
+    }
+    reservations(startDate: $from, endDate: $to) {
+        fromDate
+        guest {
+            name
+            surname
+        }
+        id
+        suite {
+            id
+        }
+        toDate
+        type
+    }
+}

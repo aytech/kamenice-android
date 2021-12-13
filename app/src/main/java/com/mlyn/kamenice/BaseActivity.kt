@@ -1,21 +1,33 @@
 package com.mlyn.kamenice
 
-import android.content.Context
 import androidx.activity.ComponentActivity
-import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.network.okHttpClient
 import com.mlyn.kamenice.configuration.AppConstants.Companion.GRAPHQL_URL
+import com.mlyn.kamenice.configuration.AppConstants.Companion.SHARED_PREFERENCES_KEY
+import okhttp3.OkHttpClient
 
 open class BaseActivity : ComponentActivity() {
     private var instance: ApolloClient? = null
 
-    fun apolloClient(context: Context): ApolloClient {
+    fun apolloClient(): ApolloClient {
         if (instance != null) {
             return instance!!
         }
 
-        instance = ApolloClient.builder()
+        val okClient = OkHttpClient.Builder()
+            .addInterceptor(
+                RefreshTokenInterceptor(
+                    preferences = applicationContext.getSharedPreferences(
+                        SHARED_PREFERENCES_KEY,
+                        MODE_PRIVATE
+                    )
+                )
+            )
+            .build()
+        instance = ApolloClient.Builder()
             .serverUrl(GRAPHQL_URL)
-            .addApplicationInterceptor(ApolloRefreshTokenInterceptor(context))
+            .okHttpClient(okClient)
             .build()
 
         return instance!!

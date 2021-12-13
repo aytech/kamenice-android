@@ -1,7 +1,7 @@
 package com.mlyn.kamenice.ui.calendar
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.Orientation
@@ -9,7 +9,7 @@ import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -36,7 +36,7 @@ fun ScheduleCalendar(
     state: ScheduleCalendarState,
     modifier: Modifier = Modifier,
     viewSpan: Long = 48 * 3600L, // in seconds
-    sections: List<CalendarSection> = emptyList(),
+    sections: MutableList<CalendarSection>,
     now: LocalDateTime = LocalDateTime.now(),
     eventTimesVisible: Boolean = true
 ) = BoxWithConstraints(
@@ -50,16 +50,18 @@ fun ScheduleCalendar(
 ) {
     state.updateView(viewSpan, constraints.maxWidth)
 
-    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+    Column(
+        modifier = Modifier.verticalScroll(rememberScrollState())
+    ) {
 
         DaysRow(
             state = state,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(top = 8.dp, bottom = 20.dp)
         )
 
-        HoursRow(state)
+        HoursRow(state, modifier = Modifier.padding(top = 0.dp, bottom = 20.dp))
 
         Box(modifier = Modifier.fillMaxWidth()) {
             Column {
@@ -91,17 +93,14 @@ fun ScheduleCalendar(
         }
     }
 
-    DayDividers(
-        state = state,
-        modifier = Modifier.matchParentSize()
-    )
+    DayDividers(state = state, modifier = Modifier.matchParentSize())
 
     // "now" indicator
     Canvas(modifier = Modifier.matchParentSize()) {
         val offsetPercent = state.offsetFraction(now)
         drawLine(
             color = Color.Magenta,
-            strokeWidth = 6f,
+            strokeWidth = 4f,
             start = Offset(offsetPercent * size.width, 0f),
             end = Offset(offsetPercent * size.width, size.height)
         )
@@ -127,7 +126,9 @@ fun CalendarSectionRow(
                 event.endDate.isAfter(state.startDateTime) && event.endDate.isBefore(state.endDateTime),
             )
         }.filter { (event, startHit, endHit) ->
-            startHit || endHit || (event.startDate.isBefore(state.startDateTime) && event.endDate.isAfter(state.endDateTime))
+            startHit || endHit || (event.startDate.isBefore(state.startDateTime) && event.endDate.isAfter(
+                state.endDateTime
+            ))
         }
 
         Text(
@@ -158,14 +159,20 @@ fun CalendarSectionRow(
                         else -> RoundedCornerShape(4.dp)
                     }
 
-                    Column(modifier = Modifier
-                        .padding(vertical = 8.dp)
-                        .width(with(LocalDensity.current) { width.toDp() })
-                        .offset { IntOffset(offsetX, 0) }
-                        .background(event.color, shape = shape)
-                        .clip(shape)
-                        .clickable { }
-                        .padding(4.dp)
+                    Column(
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .width(with(LocalDensity.current) { width.toDp() })
+                            .offset { IntOffset(offsetX, 0) }
+                            .background(event.color, shape = shape)
+                            .clip(shape)
+                            .clickable {
+                                Log.d(
+                                    "MainActivity",
+                                    "CalendarSectionRow: " + event.name
+                                )
+                            }
+                            .padding(4.dp),
                     ) {
                         Text(
                             text = event.name,
@@ -176,9 +183,20 @@ fun CalendarSectionRow(
                             modifier = Modifier.fillMaxWidth()
                         )
                         AnimatedVisibility(visible = eventTimesVisible) {
+                            // https://www.threeten.org/threetenbp/apidocs/org/threeten/bp/format/DateTimeFormatter.html#ofPattern(java.lang.String,java.util.Locale)
                             Text(
-                                text = event.startDate.format(DateTimeFormatter.ofPattern("HH:mm")) + " - " +
-                                        event.endDate.format(DateTimeFormatter.ofPattern("HH:mm")),
+                                text = "%s - %s".format(
+                                    event.startDate.format(
+                                        DateTimeFormatter.ofPattern(
+                                            "d MMM"
+                                        )
+                                    ),
+                                    event.endDate.format(
+                                        DateTimeFormatter.ofPattern(
+                                            "d MMM"
+                                        )
+                                    )
+                                ),
                                 fontSize = 12.sp,
                                 color = Color.White,
                                 maxLines = 1,
@@ -212,7 +230,7 @@ internal fun DaysRow(
                 .padding(horizontal = 8.dp)
             ) {
                 Text(
-                    text = localDateTime.format(DateTimeFormatter.ofPattern("MMM, dd")),
+                    text = localDateTime.format(DateTimeFormatter.ofPattern("dd MMM, yy")),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -226,9 +244,10 @@ internal fun DaysRow(
 
 @Composable
 internal fun HoursRow(
-    state: ScheduleCalendarState
+    state: ScheduleCalendarState,
+    modifier: Modifier = Modifier
 ) {
-    AnimatedVisibility(visible = state.visibleHours.isNotEmpty()) {
+    AnimatedVisibility(visible = state.visibleHours.isNotEmpty(), modifier = modifier) {
         Layout(
             content = {
                 state.visibleHours.forEach { localDateTime ->
@@ -303,7 +322,8 @@ private data class LocalDateTimeData(
 }
 
 private val Measurable.localDateTime: LocalDateTime
-    get() = (parentData as? LocalDateTimeData)?.localDateTime ?: error("No LocalDateTime for measurable $this")
+    get() = (parentData as? LocalDateTimeData)?.localDateTime
+        ?: error("No LocalDateTime for measurable $this")
 
 fun LocalDateTime.between(
     target: LocalDateTime,

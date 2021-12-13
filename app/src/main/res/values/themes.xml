@@ -19,12 +19,4 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
     </style>
-
-    <style name="Button.Theme.Blue" parent="Widget.AppCompat.Button.Colored">
-        <item name="backgroundTint">@color/vivid_blue</item>
-    </style>
-    <style name="Button.Theme.White" parent="Widget.AppCompat.Button.Colored">
-        <item name="backgroundTint">@color/white</item>
-        <item name="android:textColor">@color/black</item>
-    </style>
 </resources>

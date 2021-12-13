@@ -5,6 +5,7 @@ import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.runtime.*
+import com.mlyn.kamenice.ScreenRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -15,13 +16,15 @@ import org.threeten.bp.temporal.ChronoUnit
 @Composable
 fun rememberScheduleCalendarState(
     referenceDateTime: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS),
-    onDateTimeSelected: (LocalDateTime) -> Unit = {}
+    onDateTimeSelected: (LocalDateTime) -> Unit = {},
+    onScreenSelected: (ScreenRequest) -> Unit
 ): ScheduleCalendarState {
     val coroutineScope = rememberCoroutineScope()
     return remember(coroutineScope) {
         ScheduleCalendarState(
             referenceDateTime = referenceDateTime,
             onDateTimeSelected = onDateTimeSelected,
+            onScreenSelected = onScreenSelected,
             coroutineScope = coroutineScope,
         )
     }
@@ -30,6 +33,7 @@ fun rememberScheduleCalendarState(
 class ScheduleCalendarState(
     referenceDateTime: LocalDateTime,
     private val onDateTimeSelected: (LocalDateTime) -> Unit,
+    private val onScreenSelected: (ScreenRequest) -> Unit,
     private val coroutineScope: CoroutineScope
 ) {
     internal val startDateTime: LocalDateTime by derivedStateOf {
@@ -43,6 +47,8 @@ class ScheduleCalendarState(
     private val viewSpanSeconds = Animatable(ChronoUnit.DAYS.duration.seconds, LongToVector)
     private val secondsOffset = Animatable(0L, LongToVector)
     private val width = mutableStateOf(1)
+    private var screenStartTime: LocalDateTime? = null
+    private var screenEndTime: LocalDateTime? = null
 
     internal fun updateView(newViewSpanSeconds: Long, newWidth: Int) {
         this.width.value = newWidth
@@ -58,6 +64,20 @@ class ScheduleCalendarState(
     }
 
     internal val scrollableState = ScrollableState {
+        if (screenStartTime == null) {
+            screenStartTime = startDateTime
+        }
+        if (screenEndTime == null) {
+            screenEndTime = endDateTime
+        }
+        if (startDateTime >= screenEndTime) { // Scrolling right
+            screenEndTime = endDateTime
+            onScreenSelected(ScreenRequest(start = screenStartTime!!, end = screenEndTime!!))
+        }
+        if (startDateTime < screenStartTime) { // Scrolling left
+            screenStartTime = startDateTime.minusSeconds(this.viewSpanSeconds.value)
+            onScreenSelected(ScreenRequest(start = screenStartTime!!, end = screenEndTime!!))
+        }
         coroutineScope.launch {
             secondsOffset.snapTo(secondsOffset.value - it.toSeconds())
         }

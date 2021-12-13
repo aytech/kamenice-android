@@ -1,3 +1,4 @@
+# noinspection GraphQLUnresolvedReference
 mutation RefreshToken($token: String!) {
     refreshToken(refreshToken: $token) {
         payload

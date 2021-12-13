@@ -1,11 +1,10 @@
 <resources>
     <string name="app_name">Mlýn Kamenice</string>
-    <string name="enter_username">Enter username</string>
-    <string name="enter_password">Enter password</string>
-    <string name="login">Login</string>
-    <string name="reset">Reset</string>
-    <string name="empty_username">Username cannot be empty</string>
-    <string name="empty_password">Password cannot be empty</string>
-    <string name="login_invalid">Username or passwors is incorrect</string>
+    <string name="enter_username">Please enter username</string>
+    <string name="enter_password">Please enter password</string>
     <string name="login_failed">Login failed</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="close">Close</string>
+    <string name="network_error">Network error, please try again later</string>
 </resources>

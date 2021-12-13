@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Mlýn Kamenice</string>
-    <string name="enter_username">Uživatelské jméno</string>
-    <string name="enter_password">Heslo</string>
-    <string name="login">Přihlásit</string>
-    <string name="reset">Reset</string>
+
+    <string name="enter_username">Zadejte uživatelské jméno</string>
+    <string name="enter_password">Zadejte heslo</string>
+    <string name="login_failed">Přihlášení selhalo</string>
+    <string name="username">Uživatelské jméno</string>
+    <string name="password">Heslo</string>
+    <string name="close">Zavřít</string>
+    <string name="network_error">Chyba sítě, zkuste to prosím později</string>
 </resources>
