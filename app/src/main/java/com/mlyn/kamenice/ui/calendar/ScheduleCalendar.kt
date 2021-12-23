@@ -38,7 +38,8 @@ fun ScheduleCalendar(
     viewSpan: Long = 48 * 3600L, // in seconds
     sections: MutableList<CalendarSection>,
     now: LocalDateTime = LocalDateTime.now(),
-    eventTimesVisible: Boolean = true
+    eventTimesVisible: Boolean = true,
+    onEventSelected: (id: String) -> Unit
 ) = BoxWithConstraints(
     modifier
         .fillMaxWidth()
@@ -69,7 +70,8 @@ fun ScheduleCalendar(
                     CalendarSectionRow(
                         section = it,
                         state = state,
-                        eventTimesVisible = eventTimesVisible
+                        eventTimesVisible = eventTimesVisible,
+                        onEventSelected = onEventSelected
                     )
                 }
             }
@@ -116,7 +118,8 @@ fun ScheduleCalendar(
 fun CalendarSectionRow(
     section: CalendarSection,
     state: ScheduleCalendarState,
-    eventTimesVisible: Boolean
+    eventTimesVisible: Boolean,
+    onEventSelected: (id: String) -> Unit
 ) {
     Column(Modifier.animateContentSize()) {
         val eventMap = section.events.map { event ->
@@ -166,12 +169,7 @@ fun CalendarSectionRow(
                             .offset { IntOffset(offsetX, 0) }
                             .background(event.color, shape = shape)
                             .clip(shape)
-                            .clickable {
-                                Log.d(
-                                    "MainActivity",
-                                    "CalendarSectionRow: " + event.name
-                                )
-                            }
+                            .clickable { onEventSelected(event.id) }
                             .padding(4.dp),
                     ) {
                         Text(
@@ -310,6 +308,7 @@ data class CalendarSection(
 data class CalendarEvent(
     val startDate: LocalDateTime,
     val endDate: LocalDateTime,
+    val id: String = "",
     val name: String = "",
     val description: String = "",
     val color: Color = G500

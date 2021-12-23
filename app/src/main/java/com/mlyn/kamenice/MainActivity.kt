@@ -1,6 +1,5 @@
 package com.mlyn.kamenice
 
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
@@ -79,7 +78,7 @@ class MainActivity : BaseActivity() {
         sharedPreferences =
             applicationContext.getSharedPreferences(SHARED_PREFERENCES_KEY, MODE_PRIVATE)
         if (sharedPreferences.getString(USER_TOKEN, null) == null) {
-            redirectToLogin()
+            redirectTo(LoginActivity::class.java)
         }
 
         loadReservationsSubset()
@@ -89,7 +88,11 @@ class MainActivity : BaseActivity() {
     fun AppCalendar() {
         val viewSpan = remember { mutableStateOf(48 * 3600L) }
         val eventTimesVisible = remember { mutableStateOf(true) }
-        Column(modifier = Modifier.fillMaxHeight().padding(top = 20.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(top = 20.dp)
+        ) {
             Row {
                 IconButton(onClick = {
                     viewSpan.value = (viewSpan.value * 2).coerceAtMost(96 * 3600)
@@ -121,8 +124,16 @@ class MainActivity : BaseActivity() {
                 now = LocalDateTime.now(),
                 eventTimesVisible = eventTimesVisible.value,
                 sections = sections,
-                viewSpan = viewSpan.value
+                viewSpan = viewSpan.value,
+                onEventSelected = { openReservation(it) }
             )
+        }
+    }
+
+    private fun openReservation(reservationId: String) {
+        val reservation = reservations.find { reservation -> reservation?.id == reservationId }
+        if (reservation != null) {
+            redirectTo(ReservationActivity::class.java)
         }
     }
 
@@ -169,7 +180,7 @@ class MainActivity : BaseActivity() {
                     timelineEnd = requestEnd
                 } catch (ex: Exception) {
                     ex.printStackTrace()
-                    redirectToLogin()
+                    redirectTo(LoginActivity::class.java)
                 }
             }
         }, 1000)
@@ -194,6 +205,7 @@ class MainActivity : BaseActivity() {
                     CalendarEvent(
                         startDate = LocalDateTime.parse(reservation.fromDate.toString()),
                         endDate = LocalDateTime.parse(reservation.toDate.toString()),
+                        id = reservation.id,
                         name = "%s %s".format(reservation.guest.name, reservation.guest.surname),
                         description = "",
                         color = getReservationColor(reservation.type)
@@ -211,16 +223,6 @@ class MainActivity : BaseActivity() {
             ReservationType.INHABITED -> Y500
             ReservationType.ACCOMMODATED -> P500
             else -> Y300
-        }
-    }
-
-
-    private fun redirectToLogin() {
-        runOnUiThread {
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            startActivity(intent)
-            finish()
         }
     }
 }
