@@ -9,4 +9,5 @@
     <string name="password">Heslo</string>
     <string name="close">Zavřít</string>
     <string name="network_error">Chyba sítě, zkuste to prosím později</string>
+    <string name="select_reservation_range">Vyberte termíny rezervace</string>
 </resources>

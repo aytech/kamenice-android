@@ -7,4 +7,7 @@
     <string name="password">Password</string>
     <string name="close">Close</string>
     <string name="network_error">Network error, please try again later</string>
+    <string name="select_reservation_range">Select reservation range</string>
+    <string name="edit">Edit</string>
+    <string name="save">Save</string>
 </resources>
