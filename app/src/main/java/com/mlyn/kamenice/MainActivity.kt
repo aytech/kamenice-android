@@ -27,7 +27,10 @@ import com.mlyn.kamenice.ui.calendar.CalendarEvent
 import com.mlyn.kamenice.ui.calendar.CalendarSection
 import com.mlyn.kamenice.ui.calendar.ScheduleCalendar
 import com.mlyn.kamenice.ui.calendar.rememberScheduleCalendarState
+import com.mlyn.kamenice.ui.components.Guest
 import com.mlyn.kamenice.ui.components.LoadingIndicator
+import com.mlyn.kamenice.ui.components.Reservation
+import com.mlyn.kamenice.ui.components.Suite
 import com.mlyn.kamenice.ui.theme.*
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDateTime
@@ -133,7 +136,19 @@ class MainActivity : BaseActivity() {
     private fun openReservation(reservationId: String) {
         val reservation = reservations.find { reservation -> reservation?.id == reservationId }
         if (reservation != null) {
-            redirectTo(ReservationActivity::class.java)
+            redirectTo(
+                ReservationActivity::class.java, Reservation(
+                    fromDate = reservation.fromDate as String,
+                    guest = Guest(
+                        name = reservation.guest.name,
+                        surname = reservation.guest.surname
+                    ),
+                    id = reservation.id,
+                    suite = Suite(id = reservation.suite.id),
+                    toDate = reservation.toDate as String,
+                    type = reservation.type
+                )
+            )
         }
     }
 
