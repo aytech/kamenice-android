@@ -10,4 +10,6 @@
     <string name="close">Zavřít</string>
     <string name="network_error">Chyba sítě, zkuste to prosím později</string>
     <string name="select_reservation_range">Vyberte termíny rezervace</string>
+    <string name="edit">Upravit</string>
+    <string name="save">Uložit</string>
 </resources>

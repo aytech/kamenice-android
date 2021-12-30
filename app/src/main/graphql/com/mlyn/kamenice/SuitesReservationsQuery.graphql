@@ -11,6 +11,7 @@ query SuitesReservations($from: String!, $to: String!) {
     reservations(startDate: $from, endDate: $to) {
         fromDate
         guest {
+            id
             name
             surname
         }

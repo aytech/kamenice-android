@@ -17,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -25,11 +24,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.util.Pair
+import androidx.lifecycle.lifecycleScope
+import com.apollographql.apollo3.api.Optional
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.mlyn.kamenice.configuration.AppConstants.Companion.DATE_FORMAT
 import com.mlyn.kamenice.configuration.AppConstants.Companion.DATE_ZONE
-import com.mlyn.kamenice.ui.components.Reservation
+import com.mlyn.kamenice.type.ReservationInput
+import com.mlyn.kamenice.ui.components.LoadingIndicator
+import com.mlyn.kamenice.data.Reservation
+import com.mlyn.kamenice.ui.components.DropdownElement
+import com.mlyn.kamenice.ui.components.ModalDialog
 import com.mlyn.kamenice.ui.theme.AppTheme
+import com.mlyn.kamenice.ui.theme.B400
+import kotlinx.coroutines.launch
 import org.threeten.bp.Instant
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneId
@@ -38,12 +45,15 @@ import org.threeten.bp.format.DateTimeFormatter
 class ReservationActivity : BaseActivity() {
 
     private var reservation: Reservation? = null
+    private val isReservationUpdating = mutableStateOf(false)
+    private val openDialog = mutableStateOf(false)
+    private val dialogMessage = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         reservation = intent.getParcelableExtra("extra")
-
+        Log.d("ReservationActivity", "Reservation: $reservation")
         if (reservation == null) {
             redirectTo(MainActivity::class.java)
         }
@@ -57,13 +67,22 @@ class ReservationActivity : BaseActivity() {
                         }
                     }) {
                     Surface {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .verticalScroll(rememberScrollState())
-                        ) {
-                            ReservationTitle()
-                            ReservationForm()
+                        when {
+                            isReservationUpdating.value -> LoadingIndicator()
+                            else -> Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .verticalScroll(rememberScrollState())
+                            ) {
+                                ReservationTitle()
+                                ReservationForm()
+                                ModalDialog(
+                                    message = dialogMessage.value,
+                                    visible = openDialog.value
+                                ) {
+                                    openDialog.value = false
+                                }
+                            }
                         }
                     }
                 }
@@ -162,18 +181,47 @@ class ReservationActivity : BaseActivity() {
                         )
                     }
                 }
+                Row(modifier = Modifier.padding(start = 60.dp, end = 60.dp, bottom = 20.dp)) {
+                    DropdownElement(prependText = stringResource(id = R.string.guest))
+                }
+                // Submit button
                 Row {
                     OutlinedButton(
-                        border = BorderStroke(1.dp, Color.Gray),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
+                        border = BorderStroke(1.dp, B400),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = B400),
                         onClick = {
-                            Log.d("ReservationActivity", "ReservationForm: Saving")
+                            isReservationUpdating.value = true
+                            val from = fromDate.value.withHour(15).toLocalDateTime()
+                            val to = toDate.value.withHour(10).toLocalDateTime()
+                            updateReservation(
+                                ReservationInput(
+                                    fromDate = Optional.presentIfNotNull(from.toString()),
+                                    id = Optional.presentIfNotNull(reservation?.id),
+                                    toDate = Optional.presentIfNotNull(to.toString())
+                                )
+                            )
                         },
                         shape = CircleShape
                     ) {
                         Text(text = stringResource(id = R.string.save))
                     }
                 }
+            }
+        }
+    }
+
+    private fun updateReservation(input: ReservationInput) {
+        lifecycleScope.launch {
+            try {
+                val response = apolloClient().mutation(UpdateReservationMutation(input)).execute()
+                if (response.errors?.isNotEmpty() == true) {
+                    dialogMessage.value = response.errors!![0].message
+                    openDialog.value = true
+                    Log.d("ReservationActivity", "ReservationForm: ${response.errors!![0]}")
+                }
+                isReservationUpdating.value = false
+            } catch (ex: Exception) {
+                ex.printStackTrace()
             }
         }
     }

@@ -1,0 +1,9 @@
+mutation UpdateReservation($data: ReservationInput!) {
+    updateReservation(data: $data) {
+        reservation {
+            fromDate
+            id
+            toDate
+        }
+    }
+}

@@ -10,4 +10,5 @@
     <string name="select_reservation_range">Select reservation range</string>
     <string name="edit">Edit</string>
     <string name="save">Save</string>
+    <string name="guest">Guest</string>
 </resources>

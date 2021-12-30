@@ -27,10 +27,10 @@ import com.mlyn.kamenice.ui.calendar.CalendarEvent
 import com.mlyn.kamenice.ui.calendar.CalendarSection
 import com.mlyn.kamenice.ui.calendar.ScheduleCalendar
 import com.mlyn.kamenice.ui.calendar.rememberScheduleCalendarState
-import com.mlyn.kamenice.ui.components.Guest
+import com.mlyn.kamenice.data.Guest
 import com.mlyn.kamenice.ui.components.LoadingIndicator
-import com.mlyn.kamenice.ui.components.Reservation
-import com.mlyn.kamenice.ui.components.Suite
+import com.mlyn.kamenice.data.Reservation
+import com.mlyn.kamenice.data.Suite
 import com.mlyn.kamenice.ui.theme.*
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDateTime
@@ -140,6 +140,7 @@ class MainActivity : BaseActivity() {
                 ReservationActivity::class.java, Reservation(
                     fromDate = reservation.fromDate as String,
                     guest = Guest(
+                        id = reservation.guest.id,
                         name = reservation.guest.name,
                         surname = reservation.guest.surname
                     ),

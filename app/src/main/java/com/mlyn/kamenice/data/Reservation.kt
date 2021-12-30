@@ -1,4 +1,4 @@
-package com.mlyn.kamenice.ui.components
+package com.mlyn.kamenice.data
 
 import android.os.Parcelable
 import com.mlyn.kamenice.type.ReservationType
