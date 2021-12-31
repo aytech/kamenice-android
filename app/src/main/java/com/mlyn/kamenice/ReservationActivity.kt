@@ -50,6 +50,7 @@ class ReservationActivity : BaseActivity() {
     private var reservation: Reservation? = null
     private var guests: List<Guest> = listOf()
     private var selectedGuest: Guest? = null
+    private var roommates: List<Guest>? = null
     private val isReservationUpdating = mutableStateOf(false)
     private val openDialog = mutableStateOf(false)
     private val dialogMessage = mutableStateOf("")
@@ -60,6 +61,7 @@ class ReservationActivity : BaseActivity() {
         reservation = intent.getParcelableExtra(EXTRA_RESERVATION)
         guests = intent.getParcelableArrayListExtra(EXTRA_GUESTS)!!
         selectedGuest = reservation?.guest
+        roommates = reservation?.roommates
 
         if (reservation == null) {
             redirectTo(MainActivity::class.java)
@@ -202,12 +204,29 @@ class ReservationActivity : BaseActivity() {
                             isReservationUpdating.value = true
                             val from = fromDate.value.withHour(15).toLocalDateTime()
                             val to = toDate.value.withHour(10).toLocalDateTime()
+                            Log.d(
+                                "ReservationActivity",
+                                "ReservationForm: ${reservation?.roommates}"
+                            )
+
                             updateReservation(
                                 ReservationInput(
+                                    expired = Optional.presentIfNotNull(reservation?.expired),
                                     fromDate = Optional.presentIfNotNull(from.toString()),
-                                    guestId = Optional.presentIfNotNull(selectedGuest?.id?.toInt()),
+                                    guestId = Optional.presentIfNotNull(selectedGuest?.id),
                                     id = Optional.presentIfNotNull(reservation?.id),
-                                    toDate = Optional.presentIfNotNull(to.toString())
+                                    meal = Optional.presentIfNotNull(reservation?.meal.let { it?.toString() }),
+                                    notes = Optional.presentIfNotNull(reservation?.notes),
+                                    payingGuestId = Optional.presentIfNotNull(reservation?.payingGuest?.id),
+                                    priceAccommodation = Optional.presentIfNotNull(reservation?.priceAccommodation),
+                                    priceMeal = Optional.presentIfNotNull(reservation?.priceMeal),
+                                    priceMunicipality = Optional.presentIfNotNull(reservation?.priceMunicipality),
+                                    priceTotal = Optional.presentIfNotNull(reservation?.priceTotal),
+                                    purpose = Optional.presentIfNotNull(reservation?.purpose),
+                                    roommateIds = Optional.presentIfNotNull(roommates?.map { it.id }),
+                                    suiteId = Optional.presentIfNotNull(reservation?.suite?.id),
+                                    toDate = Optional.presentIfNotNull(to.toString()),
+                                    type = Optional.presentIfNotNull(reservation?.type.toString())
                                 )
                             )
                         },

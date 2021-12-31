@@ -9,6 +9,7 @@ query SuitesReservations($from: String!, $to: String!) {
         title
     }
     reservations(startDate: $from, endDate: $to) {
+        expired
         fromDate
         guest {
             id
@@ -16,6 +17,20 @@ query SuitesReservations($from: String!, $to: String!) {
             surname
         }
         id
+        meal
+        notes
+        payingGuest {
+            id
+        }
+        priceAccommodation
+        priceMeal
+        priceMunicipality
+        priceTotal
+        purpose
+        roommates {
+            age
+            id
+        }
         suite {
             id
         }

@@ -142,15 +142,15 @@ class MainActivity : BaseActivity() {
             redirectTo(
                 ReservationActivity::class.java, mapOf(
                     EXTRA_RESERVATION to Reservation(
-                        fromDate = reservation.fromDate as String,
+                        fromDate = reservation.fromDate.toString(),
                         guest = Guest(
-                            id = reservation.guest.id,
+                            id = reservation.guest.id.toInt(),
                             name = reservation.guest.name,
                             surname = reservation.guest.surname
                         ),
                         id = reservation.id,
-                        suite = Suite(id = reservation.suite.id),
-                        toDate = reservation.toDate as String,
+                        suite = Suite(id = reservation.suite.id.toInt()),
+                        toDate = reservation.toDate.toString(),
                         type = reservation.type
                     )
                 ), mapOf(EXTRA_GUESTS to ArrayList(guests))
@@ -199,7 +199,7 @@ class MainActivity : BaseActivity() {
                         if (it != null) {
                             guests.add(
                                 Guest(
-                                    id = it.id,
+                                    id = it.id.toInt(),
                                     name = it.name,
                                     surname = it.surname
                                 )
