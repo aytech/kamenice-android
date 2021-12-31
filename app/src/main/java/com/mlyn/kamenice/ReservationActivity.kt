@@ -29,10 +29,13 @@ import com.apollographql.apollo3.api.Optional
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.mlyn.kamenice.configuration.AppConstants.Companion.DATE_FORMAT
 import com.mlyn.kamenice.configuration.AppConstants.Companion.DATE_ZONE
+import com.mlyn.kamenice.configuration.AppConstants.Companion.EXTRA_GUESTS
+import com.mlyn.kamenice.configuration.AppConstants.Companion.EXTRA_RESERVATION
+import com.mlyn.kamenice.data.Guest
 import com.mlyn.kamenice.type.ReservationInput
 import com.mlyn.kamenice.ui.components.LoadingIndicator
 import com.mlyn.kamenice.data.Reservation
-import com.mlyn.kamenice.ui.components.DropdownElement
+import com.mlyn.kamenice.ui.components.GuestsDropdown
 import com.mlyn.kamenice.ui.components.ModalDialog
 import com.mlyn.kamenice.ui.theme.AppTheme
 import com.mlyn.kamenice.ui.theme.B400
@@ -45,6 +48,8 @@ import org.threeten.bp.format.DateTimeFormatter
 class ReservationActivity : BaseActivity() {
 
     private var reservation: Reservation? = null
+    private var guests: List<Guest> = listOf()
+    private var selectedGuest: Guest? = null
     private val isReservationUpdating = mutableStateOf(false)
     private val openDialog = mutableStateOf(false)
     private val dialogMessage = mutableStateOf("")
@@ -52,8 +57,10 @@ class ReservationActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        reservation = intent.getParcelableExtra("extra")
-        Log.d("ReservationActivity", "Reservation: $reservation")
+        reservation = intent.getParcelableExtra(EXTRA_RESERVATION)
+        guests = intent.getParcelableArrayListExtra(EXTRA_GUESTS)!!
+        selectedGuest = reservation?.guest
+
         if (reservation == null) {
             redirectTo(MainActivity::class.java)
         }
@@ -182,7 +189,9 @@ class ReservationActivity : BaseActivity() {
                     }
                 }
                 Row(modifier = Modifier.padding(start = 60.dp, end = 60.dp, bottom = 20.dp)) {
-                    DropdownElement(prependText = stringResource(id = R.string.guest))
+                    GuestsDropdown(guests = guests, onSelect = {
+                        selectedGuest = it
+                    })
                 }
                 // Submit button
                 Row {
@@ -196,6 +205,7 @@ class ReservationActivity : BaseActivity() {
                             updateReservation(
                                 ReservationInput(
                                     fromDate = Optional.presentIfNotNull(from.toString()),
+                                    guestId = Optional.presentIfNotNull(selectedGuest?.id?.toInt()),
                                     id = Optional.presentIfNotNull(reservation?.id),
                                     toDate = Optional.presentIfNotNull(to.toString())
                                 )

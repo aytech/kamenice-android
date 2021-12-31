@@ -22,4 +22,9 @@ query SuitesReservations($from: String!, $to: String!) {
         toDate
         type
     }
+    guests {
+        id
+        name
+        surname
+    }
 }

@@ -5,6 +5,8 @@ class AppConstants {
         const val DATE_FORMAT = "d MMM yyyy"
         const val DATE_ZONE = "Europe/Prague"
         const val GRAPHQL_URL = "https://kamenice.pythonanywhere.com/api"
+        const val EXTRA_GUESTS = "guests"
+        const val EXTRA_RESERVATION = "reservation"
         const val SHARED_PREFERENCES_KEY = "kamenicePreferences"
         const val USER_REFRESH_TOKEN = "refreshToken"
         const val USER_TOKEN = "token"

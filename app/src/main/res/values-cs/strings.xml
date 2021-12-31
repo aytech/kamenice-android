@@ -12,4 +12,5 @@
     <string name="select_reservation_range">Vyberte termíny rezervace</string>
     <string name="edit">Upravit</string>
     <string name="save">Uložit</string>
+    <string name="guest">Host</string>
 </resources>

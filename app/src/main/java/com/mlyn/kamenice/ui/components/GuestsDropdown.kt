@@ -11,12 +11,14 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.mlyn.kamenice.R
+import com.mlyn.kamenice.data.Guest
 
 @Composable
-fun DropdownElement(prependText: String = "") {
+fun GuestsDropdown(guests: List<Guest>, onSelect: (Guest) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-    val items = listOf("A", "B", "C", "D", "E", "F")
     var selectedIndex by remember { mutableStateOf(0) }
 
     Box(
@@ -25,7 +27,11 @@ fun DropdownElement(prependText: String = "") {
             .wrapContentSize(Alignment.TopStart)
     ) {
         Text(
-            text = "%s %s".format(prependText, items[selectedIndex]),
+            text = "%s: %s %s".format(
+                stringResource(id = R.string.guest),
+                guests[selectedIndex].name,
+                guests[selectedIndex].surname
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = { expanded = true }),
@@ -36,15 +42,16 @@ fun DropdownElement(prependText: String = "") {
             onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth()
         ) {
-            items.forEachIndexed { index, text ->
+            guests.forEachIndexed { index, guest ->
                 DropdownMenuItem(
                     onClick = {
                         selectedIndex = index
                         expanded = false
+                        onSelect(guest)
                     }
                 ) {
                     Text(
-                        text = text,
+                        text = "%s %s".format(guest.name, guest.surname),
                         modifier = Modifier
                             .fillMaxWidth(),
                         textAlign = TextAlign.Center

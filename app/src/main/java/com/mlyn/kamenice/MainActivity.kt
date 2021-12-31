@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.mlyn.kamenice.configuration.AppConstants.Companion.EXTRA_GUESTS
+import com.mlyn.kamenice.configuration.AppConstants.Companion.EXTRA_RESERVATION
 import com.mlyn.kamenice.configuration.AppConstants.Companion.SHARED_PREFERENCES_KEY
 import com.mlyn.kamenice.configuration.AppConstants.Companion.USER_TOKEN
 import com.mlyn.kamenice.type.ReservationType
@@ -40,6 +42,7 @@ class MainActivity : BaseActivity() {
 
     private lateinit var sharedPreferences: SharedPreferences
     private val reservations: MutableList<SuitesReservationsQuery.Reservation?> = mutableListOf()
+    private val guests: MutableList<Guest> = mutableListOf()
     private var sections: MutableList<CalendarSection> = mutableListOf()
     private var timelineStart: LocalDateTime = LocalDateTime.now().minusHours(24)
     private var timelineEnd: LocalDateTime = LocalDateTime.now().plusHours(24)
@@ -137,18 +140,20 @@ class MainActivity : BaseActivity() {
         val reservation = reservations.find { reservation -> reservation?.id == reservationId }
         if (reservation != null) {
             redirectTo(
-                ReservationActivity::class.java, Reservation(
-                    fromDate = reservation.fromDate as String,
-                    guest = Guest(
-                        id = reservation.guest.id,
-                        name = reservation.guest.name,
-                        surname = reservation.guest.surname
-                    ),
-                    id = reservation.id,
-                    suite = Suite(id = reservation.suite.id),
-                    toDate = reservation.toDate as String,
-                    type = reservation.type
-                )
+                ReservationActivity::class.java, mapOf(
+                    EXTRA_RESERVATION to Reservation(
+                        fromDate = reservation.fromDate as String,
+                        guest = Guest(
+                            id = reservation.guest.id,
+                            name = reservation.guest.name,
+                            surname = reservation.guest.surname
+                        ),
+                        id = reservation.id,
+                        suite = Suite(id = reservation.suite.id),
+                        toDate = reservation.toDate as String,
+                        type = reservation.type
+                    )
+                ), mapOf(EXTRA_GUESTS to ArrayList(guests))
             )
         }
     }
@@ -190,6 +195,17 @@ class MainActivity : BaseActivity() {
                             events = getSuiteEvents(allReservations, suite.id)
                         )
                     }!!.toMutableList()
+                    reservationsQuery.data!!.guests?.forEach {
+                        if (it != null) {
+                            guests.add(
+                                Guest(
+                                    id = it.id,
+                                    name = it.name,
+                                    surname = it.surname
+                                )
+                            )
+                        }
+                    }
                     isPageLoading.value = false
                     isPageRefreshing.value = false
                     timelineStart = requestStart

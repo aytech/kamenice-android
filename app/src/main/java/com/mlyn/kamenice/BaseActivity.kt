@@ -2,6 +2,7 @@ package com.mlyn.kamenice
 
 import android.content.Intent
 import android.os.Parcelable
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.okHttpClient
@@ -35,13 +36,16 @@ open class BaseActivity : AppCompatActivity() {
         return instance!!
     }
 
-    fun <T> redirectTo(activity: Class<T>, extra: Parcelable? = null) {
+    fun <T> redirectTo(
+        activity: Class<T>,
+        extra: Map<String, Parcelable>? = null,
+        arrayExtra: Map<String, ArrayList<Parcelable>>? = null
+    ) {
         runOnUiThread {
             val intent = Intent(this, activity)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            if (extra != null) {
-                intent.putExtra("extra", extra)
-            }
+            extra?.map { (key, value) -> intent.putExtra(key, value) }
+            arrayExtra?.map { (key, value) -> intent.putParcelableArrayListExtra(key, value) }
             startActivity(intent)
             finish()
         }
