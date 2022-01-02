@@ -144,11 +144,22 @@ class MainActivity : BaseActivity() {
                     EXTRA_RESERVATION to Reservation(
                         fromDate = reservation.fromDate.toString(),
                         guest = Guest(
-                            id = reservation.guest.id.toInt(),
+                            id = reservation.guest.id,
                             name = reservation.guest.name,
                             surname = reservation.guest.surname
                         ),
                         id = reservation.id,
+                        meal = reservation.meal,
+                        notes = reservation.notes,
+                        payingGuest = reservation.payingGuest.let { if (it != null) Guest(id = it.id) else null },
+                        priceAccommodation = reservation.priceAccommodation.toString(),
+                        priceMeal = reservation.priceMeal.toString(),
+                        priceMunicipality = reservation.priceMunicipality.toString(),
+                        priceTotal = reservation.priceTotal.toString(),
+                        purpose = reservation.purpose,
+                        roommates = reservation.roommates.map {
+                            Guest(id = it.id, name = it.name, surname = it.surname)
+                        },
                         suite = Suite(id = reservation.suite.id.toInt()),
                         toDate = reservation.toDate.toString(),
                         type = reservation.type
@@ -199,7 +210,7 @@ class MainActivity : BaseActivity() {
                         if (it != null) {
                             guests.add(
                                 Guest(
-                                    id = it.id.toInt(),
+                                    id = it.id,
                                     name = it.name,
                                     surname = it.surname
                                 )

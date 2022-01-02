@@ -30,6 +30,8 @@ query SuitesReservations($from: String!, $to: String!) {
         roommates {
             age
             id
+            name
+            surname
         }
         suite {
             id

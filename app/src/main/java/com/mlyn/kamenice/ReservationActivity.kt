@@ -193,7 +193,7 @@ class ReservationActivity : BaseActivity() {
                 Row(modifier = Modifier.padding(start = 60.dp, end = 60.dp, bottom = 20.dp)) {
                     GuestsDropdown(guests = guests, onSelect = {
                         selectedGuest = it
-                    })
+                    }, selected = getSelectedGuestIndex())
                 }
                 // Submit button
                 Row {
@@ -204,31 +204,28 @@ class ReservationActivity : BaseActivity() {
                             isReservationUpdating.value = true
                             val from = fromDate.value.withHour(15).toLocalDateTime()
                             val to = toDate.value.withHour(10).toLocalDateTime()
-                            Log.d(
-                                "ReservationActivity",
-                                "ReservationForm: ${reservation?.roommates}"
-                            )
 
                             updateReservation(
                                 ReservationInput(
                                     expired = Optional.presentIfNotNull(reservation?.expired),
                                     fromDate = Optional.presentIfNotNull(from.toString()),
-                                    guestId = Optional.presentIfNotNull(selectedGuest?.id),
+                                    guestId = Optional.presentIfNotNull(selectedGuest?.id.let { it?.toInt() }),
                                     id = Optional.presentIfNotNull(reservation?.id),
                                     meal = Optional.presentIfNotNull(reservation?.meal.let { it?.toString() }),
                                     notes = Optional.presentIfNotNull(reservation?.notes),
-                                    payingGuestId = Optional.presentIfNotNull(reservation?.payingGuest?.id),
+                                    payingGuestId = Optional.presentIfNotNull(reservation?.payingGuest?.id.let { it?.toInt() }),
                                     priceAccommodation = Optional.presentIfNotNull(reservation?.priceAccommodation),
                                     priceMeal = Optional.presentIfNotNull(reservation?.priceMeal),
                                     priceMunicipality = Optional.presentIfNotNull(reservation?.priceMunicipality),
                                     priceTotal = Optional.presentIfNotNull(reservation?.priceTotal),
                                     purpose = Optional.presentIfNotNull(reservation?.purpose),
-                                    roommateIds = Optional.presentIfNotNull(roommates?.map { it.id }),
+                                    roommateIds = Optional.presentIfNotNull(roommates?.map { it.id.toInt() }),
                                     suiteId = Optional.presentIfNotNull(reservation?.suite?.id),
                                     toDate = Optional.presentIfNotNull(to.toString()),
                                     type = Optional.presentIfNotNull(reservation?.type.toString())
                                 )
                             )
+                            redirectTo(MainActivity::class.java)
                         },
                         shape = CircleShape
                     ) {
@@ -253,5 +250,16 @@ class ReservationActivity : BaseActivity() {
                 ex.printStackTrace()
             }
         }
+    }
+
+    private fun getSelectedGuestIndex(): Int {
+        if (selectedGuest != null) {
+            for (index in guests.indices) {
+                if (guests[index].id == selectedGuest!!.id) {
+                    return index
+                }
+            }
+        }
+        return 0
     }
 }

@@ -17,9 +17,9 @@ import com.mlyn.kamenice.R
 import com.mlyn.kamenice.data.Guest
 
 @Composable
-fun GuestsDropdown(guests: List<Guest>, onSelect: (Guest) -> Unit) {
+fun GuestsDropdown(guests: List<Guest>, onSelect: (Guest) -> Unit, selected: Int) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(0) }
+    var selectedIndex by remember { mutableStateOf(selected) }
 
     Box(
         modifier = Modifier
