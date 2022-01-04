@@ -1,7 +1,6 @@
 package com.mlyn.kamenice
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
@@ -32,9 +31,10 @@ import com.mlyn.kamenice.configuration.AppConstants.Companion.DATE_ZONE
 import com.mlyn.kamenice.configuration.AppConstants.Companion.EXTRA_GUESTS
 import com.mlyn.kamenice.configuration.AppConstants.Companion.EXTRA_RESERVATION
 import com.mlyn.kamenice.data.Guest
-import com.mlyn.kamenice.type.ReservationInput
 import com.mlyn.kamenice.ui.components.LoadingIndicator
 import com.mlyn.kamenice.data.Reservation
+import com.mlyn.kamenice.data.Suite
+import com.mlyn.kamenice.type.ReservationInput
 import com.mlyn.kamenice.ui.components.GuestsDropdown
 import com.mlyn.kamenice.ui.components.ModalDialog
 import com.mlyn.kamenice.ui.theme.AppTheme
@@ -220,12 +220,11 @@ class ReservationActivity : BaseActivity() {
                                     priceTotal = Optional.presentIfNotNull(reservation?.priceTotal),
                                     purpose = Optional.presentIfNotNull(reservation?.purpose),
                                     roommateIds = Optional.presentIfNotNull(roommates?.map { it.id.toInt() }),
-                                    suiteId = Optional.presentIfNotNull(reservation?.suite?.id),
+                                    suiteId = Optional.presentIfNotNull(reservation?.suite?.id.let { it?.toInt() }),
                                     toDate = Optional.presentIfNotNull(to.toString()),
                                     type = Optional.presentIfNotNull(reservation?.type.toString())
                                 )
                             )
-                            redirectTo(MainActivity::class.java)
                         },
                         shape = CircleShape
                     ) {
@@ -243,7 +242,38 @@ class ReservationActivity : BaseActivity() {
                 if (response.errors?.isNotEmpty() == true) {
                     dialogMessage.value = response.errors!![0].message
                     openDialog.value = true
-                    Log.d("ReservationActivity", "ReservationForm: ${response.errors!![0]}")
+                } else {
+                    reservation = response.data?.updateReservation?.reservation.let {
+                        Reservation(
+                            fromDate = it?.fromDate.toString(),
+                            guest = Guest(
+                                id = it!!.guest.id,
+                                name = it.guest.name,
+                                surname = it.guest.surname
+                            ),
+                            id = it.id,
+                            meal = it.meal,
+                            notes = it.notes,
+                            payingGuest = it.payingGuest?.id.let { id ->
+                                if (id != null) Guest(id = id) else null
+                            },
+                            priceAccommodation = it.priceAccommodation.toString(),
+                            priceMeal = it.priceMeal.toString(),
+                            priceMunicipality = it.priceMunicipality.toString(),
+                            priceTotal = it.priceTotal.toString(),
+                            purpose = it.purpose,
+                            roommates = it.roommates.map { roommate ->
+                                Guest(
+                                    id = roommate.id,
+                                    name = roommate.name,
+                                    surname = roommate.surname
+                                )
+                            },
+                            suite = Suite(id = it.suite.id),
+                            toDate = it.toDate.toString(),
+                            type = it.type
+                        )
+                    }
                 }
                 isReservationUpdating.value = false
             } catch (ex: Exception) {

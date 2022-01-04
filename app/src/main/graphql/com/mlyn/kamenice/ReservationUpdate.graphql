@@ -2,8 +2,32 @@ mutation UpdateReservation($data: ReservationInput!) {
     updateReservation(data: $data) {
         reservation {
             fromDate
+            guest {
+                id
+                name
+                surname
+            }
             id
+            meal
+            notes
+            payingGuest {
+                id
+            }
+            priceAccommodation
+            priceMeal
+            priceMunicipality
+            priceTotal
+            purpose
+            roommates {
+                id
+                name
+                surname
+            }
+            suite {
+                id
+            }
             toDate
+            type
         }
     }
 }

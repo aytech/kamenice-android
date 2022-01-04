@@ -160,7 +160,7 @@ class MainActivity : BaseActivity() {
                         roommates = reservation.roommates.map {
                             Guest(id = it.id, name = it.name, surname = it.surname)
                         },
-                        suite = Suite(id = reservation.suite.id.toInt()),
+                        suite = Suite(id = reservation.suite.id),
                         toDate = reservation.toDate.toString(),
                         type = reservation.type
                     )

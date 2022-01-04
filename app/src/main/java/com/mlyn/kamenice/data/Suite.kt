@@ -4,4 +4,4 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class Suite(val id: Int): Parcelable
+class Suite(val id: String) : Parcelable
